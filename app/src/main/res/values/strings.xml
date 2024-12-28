@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">WeatherApp</string>
+    <string name="loading_message">Loading…</string>
+    <string name="error_message">Error: %1$s</string>
+    <string name="search">Search Location</string>
+    <string name="save">Save</string>
+    <string name="location">Location %s</string>
+    <string name="temperature">Temperature %s°C</string>
+    <string name="condition">Condition %s</string>
+</resources>
