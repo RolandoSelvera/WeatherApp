@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,9 +29,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rolandoselvera.R
 import com.rolandoselvera.data.remote.models.responses.WeatherResponse
+import com.rolandoselvera.ui.components.ConfirmationDialog
 import com.rolandoselvera.ui.components.MainButton
-import com.rolandoselvera.ui.components.SearchTextField
 import com.rolandoselvera.ui.components.MainTitle
+import com.rolandoselvera.ui.components.SearchTextField
 import com.rolandoselvera.ui.components.SimpleDialog
 import com.rolandoselvera.ui.components.SpaceView
 import com.rolandoselvera.ui.components.WeatherItem
@@ -41,25 +43,30 @@ import com.rolandoselvera.ui.widgets.ProgressDialog
 import com.rolandoselvera.utils.UiState
 import com.rolandoselvera.viewmodels.home.WeatherViewModel
 
-
 @Composable
 fun HomeScreen(
     viewModel: WeatherViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isShowDialog = remember { mutableStateOf(true) }
+    val deleteDialog = remember { mutableStateOf(false) }
+    val weatherToDelete = remember { mutableStateOf<WeatherResponse?>(null) }
     var searchTerm by remember { mutableStateOf("") }
     val weatherResults = remember { mutableStateListOf<WeatherResponse>() }
 
     LaunchedEffect(Unit) {
-        viewModel.getWeather("Matamoros")
+        viewModel.loadLocalWeather()
     }
 
     LayoutHomeScreen(
         viewModel = viewModel,
         searchTerm = searchTerm,
         onNameChange = { searchTerm = it },
-        weatherResults = weatherResults
+        weatherResults = weatherResults,
+        onDeleteClick = { weather ->
+            weatherToDelete.value = weather
+            deleteDialog.value = true
+        }
     )
 
     when (uiState) {
@@ -85,11 +92,31 @@ fun HomeScreen(
         }
 
         is UiState.Success -> {
-            val weather = (uiState as UiState.Success<WeatherResponse>).data
-            if (!weatherResults.contains(weather)) {
-                weatherResults.add(weather)
-            }
+            val weatherList = (uiState as UiState.Success<List<WeatherResponse>>).data
+            weatherResults.clear()
+            weatherResults.addAll(weatherList)
         }
+    }
+
+    weatherToDelete.value?.let { weatherResponse ->
+        ConfirmationDialog(
+            isVisible = deleteDialog.value,
+            title = stringResource(R.string.app_name),
+            message = stringResource(R.string.delete_message, weatherResponse.location.name),
+            onConfirm = {
+                viewModel.deleteWeatherItem(
+                    weatherResponse.location.name,
+                    weatherResponse.location.region
+                )
+                deleteDialog.value = false
+            },
+            onCancel = {
+                deleteDialog.value = false
+            },
+            onDismiss = {
+                deleteDialog.value = false
+            }
+        )
     }
 
     if (uiState is UiState.Loading) {
@@ -105,7 +132,8 @@ fun LayoutHomeScreen(
     viewModel: WeatherViewModel,
     searchTerm: String,
     onNameChange: (String) -> Unit,
-    weatherResults: List<WeatherResponse>
+    weatherResults: List<WeatherResponse>,
+    onDeleteClick: (WeatherResponse) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -131,7 +159,8 @@ fun LayoutHomeScreen(
             searchTerm = searchTerm,
             onNameChange = onNameChange,
             weatherResults = weatherResults,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues),
+            onDeleteClick = onDeleteClick
         )
     }
 }
@@ -142,7 +171,8 @@ fun ContentHomeScreen(
     searchTerm: String,
     onNameChange: (String) -> Unit,
     weatherResults: List<WeatherResponse>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDeleteClick: (WeatherResponse) -> Unit
 ) {
     Column(
         modifier
@@ -168,32 +198,36 @@ fun ContentHomeScreen(
                 modifier = Modifier
                     .fillMaxWidth(),
                 icon = null,
-                text = stringResource(R.string.search),
+                backgroundColor = Secondary,
+                text = stringResource(R.string.save),
                 enabled = true,
                 onClick = {
                     viewModel.getWeather(searchTerm)
                 }
             )
 
-            MainButton(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                icon = null,
-                backgroundColor = Secondary,
-                text = stringResource(R.string.save),
-                enabled = true,
-                onClick = {
-
-                }
-            )
-
             SpaceView(padding = 8.dp)
+
+            if (weatherResults.isEmpty()) {
+                MainTitle(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp),
+                    title = stringResource(R.string.no_results),
+                    textAlign = TextAlign.Center,
+                    fontSize = 16.sp,
+                    textColor = Color.Black
+                )
+            }
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(weatherResults) { weather ->
-                    WeatherItem(weather = weather)
+                    WeatherItem(
+                        weather = weather,
+                        onDeleteClick = { weatherToDelete -> onDeleteClick(weatherToDelete) }
+                    )
                     HorizontalDivider(thickness = 2.dp)
                 }
             }
@@ -211,6 +245,6 @@ fun ContentHomeScreen(
 private fun DefaultPreview() {
     val viewModel: WeatherViewModel = hiltViewModel()
     MyApplicationTheme {
-        LayoutHomeScreen(viewModel, "", {}, arrayListOf())
+        LayoutHomeScreen(viewModel, "", {}, arrayListOf(), {})
     }
 }

@@ -4,10 +4,12 @@
     <string name="error_message">Error: %1$s</string>
     <string name="search_location">Search Location</string>
     <string name="search">Search</string>
-    <string name="save">Save</string>
+    <string name="save">Search &amp; Save</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
     <string name="location">Location: %s</string>
     <string name="temperature">Temperature: %s°C</string>
     <string name="condition">Condition: %s</string>
+    <string name="delete_message">Are you sure you want to delete %s?</string>
+    <string name="no_results">No weather results found.</string>
 </resources>

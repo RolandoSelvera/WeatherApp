@@ -23,12 +23,13 @@ import androidx.compose.ui.unit.sp
 fun MainTitle(
     modifier: Modifier,
     title: String,
+    textColor: Color = Color.White,
     textAlign: TextAlign? = TextAlign.Center,
     fontSize: TextUnit = 14.sp
 ) {
     Text(
         text = title,
-        color = Color.White,
+        color = textColor,
         fontWeight = FontWeight.Bold,
         modifier = modifier,
         textAlign = textAlign,

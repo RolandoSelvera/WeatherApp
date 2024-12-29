@@ -1,5 +1,7 @@
 package com.rolandoselvera.ui.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,7 +29,7 @@ import com.rolandoselvera.R
 import com.rolandoselvera.data.remote.models.responses.WeatherResponse
 
 @Composable
-fun WeatherItem(weather: WeatherResponse?) {
+fun WeatherItem(weather: WeatherResponse?, onDeleteClick: (WeatherResponse) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -35,7 +37,7 @@ fun WeatherItem(weather: WeatherResponse?) {
         verticalArrangement = Arrangement.Center
     ) {
 
-        val urlIcon = "https:${weather?.current?.condition?.icon}"
+        val urlIcon = weather?.current?.condition?.icon
         val model = ImageRequest.Builder(LocalContext.current)
             .data(urlIcon)
             .crossfade(true)
@@ -58,7 +60,11 @@ fun WeatherItem(weather: WeatherResponse?) {
                 placeholder = painterResource(R.drawable.ic_not_found),
             )
 
-            Column(modifier = Modifier.padding(start = 16.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .weight(1f) // Deja que este espacio use el máximo disponible
+            ) {
                 Text(
                     text = stringResource(
                         R.string.location,
@@ -80,6 +86,17 @@ fun WeatherItem(weather: WeatherResponse?) {
                     )
                 )
             }
+
+            Image(
+                painter = painterResource(R.drawable.ic_delete),
+                contentDescription = "",
+                modifier = Modifier
+                    .width(30.dp)
+                    .height(30.dp)
+                    .clickable {
+                        weather?.location?.let { onDeleteClick(weather) }
+                    }
+            )
         }
     }
 }
@@ -87,5 +104,5 @@ fun WeatherItem(weather: WeatherResponse?) {
 @Preview(showBackground = true)
 @Composable
 fun WeatherItemPreview() {
-    WeatherItem(null)
+    WeatherItem(null, {})
 }
