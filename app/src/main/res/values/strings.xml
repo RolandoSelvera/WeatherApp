@@ -8,8 +8,13 @@
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
     <string name="location">Location: %s</string>
+    <string name="country">Country: %s</string>
     <string name="temperature">Temperature: %s°C</string>
     <string name="condition">Condition: %s</string>
+    <string name="localtime">Localtime: %s</string>
+    <string name="wind">Wind: %s kph</string>
+    <string name="wind_direction">Wind Direction: %s</string>
+    <string name="humidity">Humidity: %s</string>
     <string name="delete_message">Are you sure you want to delete %s?</string>
     <string name="no_results">No weather results found.</string>
 </resources>
