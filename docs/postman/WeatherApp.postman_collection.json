@@ -1,0 +1,45 @@
+{
+	"info": {
+		"_postman_id": "602d75dc-ba57-4b2a-9ddf-bb2c393f9222",
+		"name": "WeatherApp",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32204459"
+	},
+	"item": [
+		{
+			"name": "current weather",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}current.json?key=&q=China&aqi=no",
+					"host": [
+						"{{BASE_URL}}current",
+						"json"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "",
+							"description": "Your API_KEY here!"
+						},
+						{
+							"key": "q",
+							"value": "China",
+							"description": "Query (location, latitude, longitude, city, etc)"
+						},
+						{
+							"key": "aqi",
+							"value": "no",
+							"description": "Air Quality Data"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

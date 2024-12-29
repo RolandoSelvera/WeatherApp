@@ -43,7 +43,7 @@ Para compilar y ejecutar este proyecto, sigue estos pasos:
 1.  **Clona el repositorio:**
 ``git clone https://github.com/rolandoselvera/WeatherApp.git``
 
-4. **Abre el proyecto en Android Studio:**
+2. **Abre el proyecto en Android Studio:**
 * Asegúrate de tener instalado Android Studio con una versión compatible con el proyecto ([Android Studio Koala](https://developer.android.com/studio/releases/past-releases/as-koala-release-notes) o superior).
 * Abre el proyecto y sincroniza Gradle si es necesario.
 
@@ -60,6 +60,10 @@ Para compilar y ejecutar este proyecto, sigue estos pasos:
 4. **Ejecutar la aplicación:**
 * Conecta un dispositivo Android físico o inicia un emulador.
 * Haz clic en el botón **Run** o usa el atajo **Shift + F10** para compilar y ejecutar la aplicación.
+
+### Otros recursos
+
+Puedes descargar e importar la colección de POSTMAN para probar la API de WeatherAPI [desde este enlace](docs/postman).
 
 ### Contacto del desarrollador
 
