@@ -289,7 +289,8 @@ private fun setupFilters(
     filteredResults.addAll(
         weatherResults.filter {
             it.location.name.contains(searchTerm.trim(), ignoreCase = true) ||
-                    it.location.region.contains(searchTerm.trim(), ignoreCase = true)
+                    it.location.region.contains(searchTerm.trim(), ignoreCase = true) ||
+                    it.location.country.contains(searchTerm.trim(), ignoreCase = true)
         }
     )
 }

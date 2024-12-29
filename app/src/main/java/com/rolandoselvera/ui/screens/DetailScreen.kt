@@ -16,6 +16,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +31,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
@@ -36,8 +42,15 @@ import coil3.size.Scale
 import com.rolandoselvera.R
 import com.rolandoselvera.data.remote.models.responses.WeatherResponse
 import com.rolandoselvera.ui.components.HeaderIconButton
+import com.rolandoselvera.ui.components.MainButton
 import com.rolandoselvera.ui.components.MainTitle
+import com.rolandoselvera.ui.components.SimpleDialog
+import com.rolandoselvera.ui.components.SpaceView
 import com.rolandoselvera.ui.theme.Primary
+import com.rolandoselvera.ui.theme.Secondary
+import com.rolandoselvera.ui.widgets.ProgressDialog
+import com.rolandoselvera.utils.UiState
+import com.rolandoselvera.viewmodels.home.WeatherViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,7 +92,15 @@ fun DetailScreen(
 }
 
 @Composable
-fun ContentDetailScreen(modifier: Modifier, weather: WeatherResponse?) {
+fun ContentDetailScreen(
+    viewModel: WeatherViewModel = hiltViewModel(),
+    modifier: Modifier,
+    weather: WeatherResponse?
+) {
+    var currentWeather by remember { mutableStateOf(weather) }
+    var isUpdate by remember { mutableStateOf(false) }
+    val isShowDialog = remember { mutableStateOf(true) }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -87,8 +108,7 @@ fun ContentDetailScreen(modifier: Modifier, weather: WeatherResponse?) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        val urlIcon = weather?.current?.condition?.icon
+        val urlIcon = currentWeather?.current?.condition?.icon
         val model = ImageRequest.Builder(LocalContext.current)
             .data(urlIcon)
             .crossfade(true)
@@ -101,7 +121,7 @@ fun ContentDetailScreen(modifier: Modifier, weather: WeatherResponse?) {
                 .height(80.dp)
                 .clip(shape = CircleShape),
             model = model,
-            contentDescription = "",
+            contentDescription = null,
             contentScale = ContentScale.Crop,
             error = painterResource(R.drawable.ic_not_found),
             placeholder = painterResource(R.drawable.ic_not_found),
@@ -112,7 +132,6 @@ fun ContentDetailScreen(modifier: Modifier, weather: WeatherResponse?) {
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Column(
                 modifier = Modifier
                     .padding(top = 16.dp, start = 16.dp)
@@ -121,7 +140,7 @@ fun ContentDetailScreen(modifier: Modifier, weather: WeatherResponse?) {
                 Text(
                     text = stringResource(
                         R.string.location,
-                        "${weather?.location?.name}, ${weather?.location?.region}"
+                        "${currentWeather?.location?.name}, ${currentWeather?.location?.region}"
                     ),
                     fontSize = 16.sp
                 )
@@ -129,7 +148,7 @@ fun ContentDetailScreen(modifier: Modifier, weather: WeatherResponse?) {
                 Text(
                     text = stringResource(
                         R.string.country,
-                        "${weather?.location?.country}"
+                        "${currentWeather?.location?.country}"
                     ),
                     fontSize = 16.sp
                 )
@@ -137,7 +156,7 @@ fun ContentDetailScreen(modifier: Modifier, weather: WeatherResponse?) {
                 Text(
                     text = stringResource(
                         R.string.temperature,
-                        "${weather?.current?.tempC}"
+                        "${currentWeather?.current?.tempC}"
                     ),
                     fontSize = 16.sp
                 )
@@ -145,7 +164,7 @@ fun ContentDetailScreen(modifier: Modifier, weather: WeatherResponse?) {
                 Text(
                     text = stringResource(
                         R.string.condition,
-                        "${weather?.current?.condition?.text}"
+                        "${currentWeather?.current?.condition?.text}"
                     ),
                     fontSize = 16.sp
                 )
@@ -153,7 +172,7 @@ fun ContentDetailScreen(modifier: Modifier, weather: WeatherResponse?) {
                 Text(
                     text = stringResource(
                         R.string.localtime,
-                        "${weather?.location?.localtime}"
+                        "${currentWeather?.location?.localtime}"
                     ),
                     fontSize = 16.sp
                 )
@@ -161,7 +180,7 @@ fun ContentDetailScreen(modifier: Modifier, weather: WeatherResponse?) {
                 Text(
                     text = stringResource(
                         R.string.wind,
-                        "${weather?.current?.windKph}"
+                        "${currentWeather?.current?.windKph}"
                     ),
                     fontSize = 16.sp
                 )
@@ -169,7 +188,7 @@ fun ContentDetailScreen(modifier: Modifier, weather: WeatherResponse?) {
                 Text(
                     text = stringResource(
                         R.string.wind_direction,
-                        "${weather?.current?.windKph}"
+                        "${currentWeather?.current?.windDir}"
                     ),
                     fontSize = 16.sp
                 )
@@ -177,10 +196,67 @@ fun ContentDetailScreen(modifier: Modifier, weather: WeatherResponse?) {
                 Text(
                     text = stringResource(
                         R.string.humidity,
-                        "${weather?.current?.humidity}"
+                        "${currentWeather?.current?.humidity}%"
                     ),
                     fontSize = 16.sp
                 )
+
+                SpaceView(8.dp)
+
+                MainButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    icon = null,
+                    backgroundColor = Secondary,
+                    text = stringResource(R.string.update),
+                    enabled = true,
+                    onClick = {
+                        isUpdate = true
+                        viewModel.getWeather(
+                            location = "${currentWeather?.location?.name}, ${currentWeather?.location?.region}",
+                            isUpdate = true
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+    // UI states:
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    when (uiState) {
+        UiState.Loading -> {
+            isShowDialog.value = true
+            if (isUpdate) ProgressDialog(isVisible = true)
+        }
+
+        is UiState.Error -> {
+            if (isShowDialog.value) {
+                SimpleDialog(
+                    isVisible = isShowDialog.value,
+                    title = stringResource(R.string.app_name),
+                    message = stringResource(
+                        R.string.error_message,
+                        "${(uiState as UiState.Error).throwable.message}"
+                    ),
+                    buttonText = stringResource(R.string.accept),
+                    onDismiss = {
+                        isShowDialog.value = false
+                    }
+                )
+            }
+        }
+
+        is UiState.Success -> {
+            val weatherList = (uiState as UiState.Success<List<WeatherResponse>>).data
+            if (weatherList.isNotEmpty()) {
+                val filteredWeather = weatherList.find { weatherItem ->
+                    weatherItem.location.name == currentWeather?.location?.name &&
+                            weatherItem.location.region == currentWeather?.location?.region
+                }
+
+                filteredWeather?.let {
+                    currentWeather = it
+                }
             }
         }
     }

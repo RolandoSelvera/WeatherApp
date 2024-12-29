@@ -24,13 +24,17 @@ class WeatherViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState<List<WeatherResponse>>>(UiState.Loading)
     val uiState: StateFlow<UiState<List<WeatherResponse>>> = _uiState
 
-    fun getWeather(location: String) {
+    fun getWeather(location: String, isUpdate: Boolean = false) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
                 val weather = repository.fetchWeather(location)
                 val weatherEntity = weather.toWeatherEntity()
-                repositoryDb.saveWeatherIfNew(weatherEntity)
+                if (isUpdate) {
+                    repositoryDb.updateWeather(weatherEntity)
+                } else {
+                    repositoryDb.saveWeatherIfNew(weatherEntity)
+                }
                 loadLocalWeather()
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e)

@@ -17,6 +17,17 @@ class WeatherDbRepository @Inject constructor(
         }
     }
 
+    suspend fun updateWeather(weatherEntity: WeatherEntity) {
+        val existingWeather =
+            weatherDao.getWeather(weatherEntity.locationName, weatherEntity.locationRegion)
+        if (existingWeather != null) {
+            val weatherToUpdate = weatherEntity.copy(
+                id = existingWeather.id
+            )
+            weatherDao.updateWeather(weatherToUpdate)
+        }
+    }
+
     suspend fun getAllWeather(): List<WeatherEntity> {
         return weatherDao.getAllWeather()
     }

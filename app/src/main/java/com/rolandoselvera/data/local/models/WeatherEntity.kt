@@ -15,7 +15,12 @@ data class WeatherEntity(
     val tempC: Double,
     val locationName: String,
     val locationRegion: String,
-    val urlIcon: String
+    val country: String,
+    val urlIcon: String,
+    val localTime: String,
+    val windKph: Double,
+    val winDir: String,
+    val humidity: Int,
 )
 
 fun WeatherResponse.toWeatherEntity(): WeatherEntity {
@@ -24,7 +29,12 @@ fun WeatherResponse.toWeatherEntity(): WeatherEntity {
         tempC = current.tempC,
         locationName = location.name,
         locationRegion = location.region,
-        urlIcon = "https:${current.condition.icon}"
+        country = location.country,
+        urlIcon = "https:${current.condition.icon}",
+        localTime = location.localtime,
+        windKph = current.windKph,
+        winDir = current.windDir,
+        humidity = current.humidity
     )
 }
 
@@ -33,12 +43,12 @@ fun WeatherEntity.toWeatherResponse(): WeatherResponse {
         location = Location(
             name = locationName,
             region = locationRegion,
-            country = "",
+            country = country,
             lat = 0.0,
             lon = 0.0,
             tzId = "",
             localtimeEpoch = 0,
-            localtime = ""
+            localtime = localTime
         ),
         current = Current(
             lastUpdatedEpoch = 0,
@@ -52,14 +62,14 @@ fun WeatherEntity.toWeatherResponse(): WeatherResponse {
                 code = 0
             ),
             windMph = 0.0,
-            windKph = 0.0,
+            windKph = windKph,
             windDegree = 0,
-            windDir = "",
+            windDir = winDir,
             pressureMb = 0.0,
             pressureIn = 0.0,
             precipMm = 0.0,
             precipIn = 0.0,
-            humidity = 0,
+            humidity = humidity,
             cloud = 0,
             feelslikeC = 0.0,
             feelslikeF = 0.0,

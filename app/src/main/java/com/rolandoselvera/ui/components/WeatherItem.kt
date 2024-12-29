@@ -82,6 +82,13 @@ fun WeatherItem(
 
                 Text(
                     text = stringResource(
+                        R.string.country,
+                        "${weather?.location?.country}"
+                    )
+                )
+
+                Text(
+                    text = stringResource(
                         R.string.temperature,
                         "${weather?.current?.tempC}"
                     )
