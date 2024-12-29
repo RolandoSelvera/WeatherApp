@@ -53,19 +53,42 @@ fun HomeScreen(
     val weatherToDelete = remember { mutableStateOf<WeatherResponse?>(null) }
     var searchTerm by remember { mutableStateOf("") }
     val weatherResults = remember { mutableStateListOf<WeatherResponse>() }
+    val filteredResults = remember { mutableStateListOf<WeatherResponse>() }
 
     LaunchedEffect(Unit) {
         viewModel.loadLocalWeather()
+    }
+
+    val resultsToDisplay = if (searchTerm.isEmpty()) {
+        weatherResults
+    } else {
+        filteredResults.clear()
+        filteredResults.addAll(
+            weatherResults.filter {
+                it.location.name.contains(searchTerm.trim(), ignoreCase = true) ||
+                        it.location.region.contains(searchTerm.trim(), ignoreCase = true)
+            }
+        )
+        filteredResults
     }
 
     LayoutHomeScreen(
         viewModel = viewModel,
         searchTerm = searchTerm,
         onNameChange = { searchTerm = it },
-        weatherResults = weatherResults,
+        weatherResults = resultsToDisplay,
         onDeleteClick = { weather ->
             weatherToDelete.value = weather
             deleteDialog.value = true
+        },
+        onClickSearchIcon = {
+            filteredResults.clear()
+            filteredResults.addAll(
+                weatherResults.filter {
+                    it.location.name.contains(searchTerm.trim(), ignoreCase = true) ||
+                            it.location.region.contains(searchTerm.trim(), ignoreCase = true)
+                }
+            )
         }
     )
 
@@ -133,7 +156,8 @@ fun LayoutHomeScreen(
     searchTerm: String,
     onNameChange: (String) -> Unit,
     weatherResults: List<WeatherResponse>,
-    onDeleteClick: (WeatherResponse) -> Unit
+    onDeleteClick: (WeatherResponse) -> Unit,
+    onClickSearchIcon: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -160,7 +184,8 @@ fun LayoutHomeScreen(
             onNameChange = onNameChange,
             weatherResults = weatherResults,
             modifier = Modifier.padding(paddingValues),
-            onDeleteClick = onDeleteClick
+            onDeleteClick = onDeleteClick,
+            onClickSearchIcon = onClickSearchIcon
         )
     }
 }
@@ -172,7 +197,8 @@ fun ContentHomeScreen(
     onNameChange: (String) -> Unit,
     weatherResults: List<WeatherResponse>,
     modifier: Modifier = Modifier,
-    onDeleteClick: (WeatherResponse) -> Unit
+    onDeleteClick: (WeatherResponse) -> Unit,
+    onClickSearchIcon: () -> Unit
 ) {
     Column(
         modifier
@@ -188,7 +214,7 @@ fun ContentHomeScreen(
                 onValueChange = onNameChange,
                 label = stringResource(R.string.search_location),
                 onClickSearchIcon = {
-                    viewModel.getWeather(searchTerm)
+                    onClickSearchIcon()
                 }
             )
 
@@ -200,7 +226,7 @@ fun ContentHomeScreen(
                 icon = null,
                 backgroundColor = Secondary,
                 text = stringResource(R.string.save),
-                enabled = true,
+                enabled = searchTerm.trim().isNotEmpty() && searchTerm.length > 3,
                 onClick = {
                     viewModel.getWeather(searchTerm)
                 }
@@ -245,6 +271,6 @@ fun ContentHomeScreen(
 private fun DefaultPreview() {
     val viewModel: WeatherViewModel = hiltViewModel()
     MyApplicationTheme {
-        LayoutHomeScreen(viewModel, "", {}, arrayListOf(), {})
+        LayoutHomeScreen(viewModel, "", {}, arrayListOf(), {}, {})
     }
 }

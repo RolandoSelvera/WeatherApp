@@ -2,7 +2,7 @@
     <string name="app_name">WeatherApp</string>
     <string name="loading_message">Loading…</string>
     <string name="error_message">Error: %1$s</string>
-    <string name="search_location">Search Location</string>
+    <string name="search_location">Search by City or Region</string>
     <string name="search">Search</string>
     <string name="save">Search &amp; Save</string>
     <string name="accept">Accept</string>
