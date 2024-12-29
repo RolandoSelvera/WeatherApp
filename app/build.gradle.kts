@@ -19,7 +19,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "com.rolandoselvera.HiltTestRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -91,6 +91,9 @@ dependencies {
     testImplementation(libs.hilt.android.testing)
     kspTest(libs.hilt.android.compiler)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.androidx.espresso.core)
 
     // Android:
     implementation(libs.androidx.core.ktx)
@@ -122,4 +125,8 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.gson)
     implementation(libs.logging.interceptor)
+
+    // Coil:
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 }

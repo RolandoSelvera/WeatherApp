@@ -24,7 +24,9 @@ Librerías externas:
 
 ### Capturas de pantalla
 
-N/A
+<img src="/docs/img1.png" height="480"> <img src="/docs/img2.png" height="480"> <img src="/docs/img3.png" height="480">
+
+<img src="/docs/img4.png" height="480">
 
 ### Video Demo
 
@@ -34,9 +36,43 @@ N/A
 
 En el diseño de la app se siguieron los lineamientos de [Material Design](https://material.io/).
 
-### Descarga del proyecto y otros recursos
+### Compilación y ejecución
 
-El proyecto puedes clonarlo o descargarlo si lo deseas.
+Para compilar y ejecutar este proyecto, sigue estos pasos:
+
+1.  **Clona el repositorio:**
+``git clone https://github.com/rolandoselvera/WeatherApp.git``
+
+2. **Abre el proyecto en Android Studio:**
+* Asegúrate de tener instalado Android Studio con una versión compatible con el proyecto ([Android Studio Koala](https://developer.android.com/studio/releases/past-releases/as-koala-release-notes) o superior).
+* Abre el proyecto y sincroniza Gradle si es necesario.
+
+**IMPORTANTE:**
+* La versión de **Java** utilizada para compilar el proyecto es la 17.
+* La versión de **JDK Gradle** que se utilizó en el proyecto es la 21.0.3. Puedes configurar esta opción en  `File > Settings > Build, Execution, Deployment > Build Tools > Gradle > Gradle JDK` y seleccionar esa versión o descargarla en ese menú.
+
+3. **Configura la clave API:**
+* Obtén tu clave de API gratuita en [WeatherAPI](https://www.weatherapi.com/docs/).
+* Abre el archivo `local.properties` que se encuentra en el directorio raíz del proyecto. Si no existe, puedes crearlo con ese mismo nombre.
+* Añade la siguiente línea, reemplazando `YOUR_API_KEY` con tu clave de API:
+    * ``API_KEY=YOUR_API_KEY``
+
+4. **Ejecutar la aplicación:**
+* Conecta un dispositivo Android físico o inicia un emulador.
+* Haz clic en el botón **Run** o usa el atajo **Shift + F10** para compilar y ejecutar la aplicación.
+
+### Tests
+
+El proyecto incluye algunas pruebas unitarias e instrumentadas para probar su funcionalidad. Se utilizan las siguientes librerías:
+
+* [JUnit](https://junit.org/junit4/): Para las pruebas unitarias, verificando la lógica de negocio en los ViewModels y repositorios.
+* [Mockito](https://site.mockito.org/): Para crear objetos simulados (mocks) de las dependencias como los repositorios, lo que permite aislar las pruebas.
+* [Kotlin Coroutines Test](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-test/): Para probar la lógica asincrónica en los ViewModels, utilizando un dispatcher de prueba para controlar el comportamiento de las corrutinas.
+* [Jetpack Compose Test](https://developer.android.com/develop/ui/compose/testing?hl=es-419): Para realizar pruebas de la interfaz de usuario (UI), asegurando que los componentes de la pantalla, se muestren correctamente.
+
+### Otros recursos
+
+Puedes descargar e importar la colección de POSTMAN para probar la API de WeatherAPI [desde este enlace](docs/postman).
 
 ### Contacto del desarrollador
 
