@@ -4,21 +4,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,13 +28,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rolandoselvera.R
 import com.rolandoselvera.data.remote.models.responses.WeatherResponse
-import com.rolandoselvera.ui.components.HeaderIconButton
 import com.rolandoselvera.ui.components.MainButton
-import com.rolandoselvera.ui.components.MainTextField
+import com.rolandoselvera.ui.components.SearchTextField
 import com.rolandoselvera.ui.components.MainTitle
+import com.rolandoselvera.ui.components.SimpleDialog
 import com.rolandoselvera.ui.components.SpaceView
+import com.rolandoselvera.ui.components.WeatherItem
 import com.rolandoselvera.ui.theme.MyApplicationTheme
 import com.rolandoselvera.ui.theme.Primary
+import com.rolandoselvera.ui.theme.Secondary
+import com.rolandoselvera.ui.widgets.ProgressDialog
 import com.rolandoselvera.utils.UiState
 import com.rolandoselvera.viewmodels.home.WeatherViewModel
 
@@ -44,42 +47,74 @@ fun HomeScreen(
     viewModel: WeatherViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isShowDialog = remember { mutableStateOf(true) }
+    var searchTerm by remember { mutableStateOf("") }
+    val weatherResults = remember { mutableStateListOf<WeatherResponse>() }
+
     LaunchedEffect(Unit) {
         viewModel.getWeather("Matamoros")
     }
 
+    LayoutHomeScreen(
+        viewModel = viewModel,
+        searchTerm = searchTerm,
+        onNameChange = { searchTerm = it },
+        weatherResults = weatherResults
+    )
+
     when (uiState) {
-        is UiState.Loading -> {
-            Text(stringResource(R.string.loading_message), modifier = Modifier.fillMaxSize())
+        UiState.Loading -> {
+            isShowDialog.value = true
         }
 
         is UiState.Error -> {
-            Text(
-                text = stringResource(
-                    R.string.error_message,
-                    "${(uiState as UiState.Error).throwable.message}"
-                ),
-                modifier = Modifier.fillMaxSize(),
-                color = Color.Red
-            )
+            if (isShowDialog.value) {
+                SimpleDialog(
+                    isVisible = isShowDialog.value,
+                    title = stringResource(R.string.app_name),
+                    message = stringResource(
+                        R.string.error_message,
+                        "${(uiState as UiState.Error).throwable.message}"
+                    ),
+                    buttonText = stringResource(R.string.accept),
+                    onDismiss = {
+                        isShowDialog.value = false
+                    }
+                )
+            }
         }
 
         is UiState.Success -> {
             val weather = (uiState as UiState.Success<WeatherResponse>).data
-            LayoutHomeScreen(weather)
+            if (!weatherResults.contains(weather)) {
+                weatherResults.add(weather)
+            }
         }
+    }
+
+    if (uiState is UiState.Loading) {
+        ProgressDialog(isVisible = true)
+    } else {
+        ProgressDialog(isVisible = false)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LayoutHomeScreen(weather: WeatherResponse?) {
+fun LayoutHomeScreen(
+    viewModel: WeatherViewModel,
+    searchTerm: String,
+    onNameChange: (String) -> Unit,
+    weatherResults: List<WeatherResponse>
+) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     MainTitle(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp),
                         title = stringResource(R.string.app_name),
                         textAlign = TextAlign.Start,
                         fontSize = 20.sp
@@ -88,17 +123,14 @@ fun LayoutHomeScreen(weather: WeatherResponse?) {
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Primary
                 ),
-                navigationIcon = {
-                    HeaderIconButton(icon = Icons.AutoMirrored.Filled.ArrowBack) {
-
-                    }
-                }
             )
         }
     ) { paddingValues ->
         ContentHomeScreen(
-            weather,
-            {},
+            viewModel = viewModel,
+            searchTerm = searchTerm,
+            onNameChange = onNameChange,
+            weatherResults = weatherResults,
             modifier = Modifier.padding(paddingValues)
         )
     }
@@ -106,8 +138,10 @@ fun LayoutHomeScreen(weather: WeatherResponse?) {
 
 @Composable
 fun ContentHomeScreen(
-    weather: WeatherResponse?,
-    onSave: () -> Unit,
+    viewModel: WeatherViewModel,
+    searchTerm: String,
+    onNameChange: (String) -> Unit,
+    weatherResults: List<WeatherResponse>,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -115,16 +149,17 @@ fun ContentHomeScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        var nameDataItemType by remember { mutableStateOf("") }
-
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            MainTextField(
+            SearchTextField(
                 modifier = Modifier.fillMaxWidth(),
-                nameDataItemType,
-                { nameDataItemType = it },
-                stringResource(R.string.search)
+                value = searchTerm,
+                onValueChange = onNameChange,
+                label = stringResource(R.string.search_location),
+                onClickSearchIcon = {
+                    viewModel.getWeather(searchTerm)
+                }
             )
 
             SpaceView(padding = 8.dp)
@@ -133,32 +168,35 @@ fun ContentHomeScreen(
                 modifier = Modifier
                     .fillMaxWidth(),
                 icon = null,
+                text = stringResource(R.string.search),
+                enabled = true,
+                onClick = {
+                    viewModel.getWeather(searchTerm)
+                }
+            )
+
+            MainButton(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                icon = null,
+                backgroundColor = Secondary,
                 text = stringResource(R.string.save),
-                enabled = true
-            ) { }
+                enabled = true,
+                onClick = {
+
+                }
+            )
 
             SpaceView(padding = 8.dp)
 
-            Text(
-                text = stringResource(
-                    R.string.location,
-                    "${weather?.location?.name}, ${weather?.location?.region}"
-                )
-            )
-
-            Text(
-                text = stringResource(
-                    R.string.temperature,
-                    "${weather?.current?.tempC}"
-                )
-            )
-
-            Text(
-                text = stringResource(
-                    R.string.condition,
-                    "${weather?.current?.condition?.text}"
-                )
-            )
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(weatherResults) { weather ->
+                    WeatherItem(weather = weather)
+                    HorizontalDivider(thickness = 2.dp)
+                }
+            }
         }
     }
 }
@@ -171,7 +209,8 @@ fun ContentHomeScreen(
 )
 @Composable
 private fun DefaultPreview() {
+    val viewModel: WeatherViewModel = hiltViewModel()
     MyApplicationTheme {
-        LayoutHomeScreen(null)
+        LayoutHomeScreen(viewModel, "", {}, arrayListOf())
     }
 }

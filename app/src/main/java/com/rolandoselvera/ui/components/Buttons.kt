@@ -19,8 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rolandoselvera.ui.theme.Secondary
+import com.rolandoselvera.ui.theme.Primary
 
 @Composable
 fun FloatButton(onClick: () -> Unit) {
@@ -41,13 +43,14 @@ fun MainButton(
     modifier: Modifier,
     icon: Painter?,
     text: String,
+    backgroundColor: Color = Primary,
     enabled: Boolean = false,
     onClick: () -> Unit
 ) {
     Button(
         colors = ButtonDefaults.buttonColors(
             contentColor = Color.White,
-            containerColor = Secondary
+            containerColor = backgroundColor
         ),
         onClick = onClick,
         contentPadding = PaddingValues(8.dp),
@@ -58,7 +61,7 @@ fun MainButton(
             if (icon != null) {
                 Icon(painter = icon, contentDescription = "", modifier = Modifier.size(24.dp))
             }
-            Text(text = text)
+            Text(text = text.uppercase(), fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -85,4 +88,10 @@ fun CircleButton(
     ) {
         Icon(painter = icon, contentDescription = "", modifier = Modifier.size(24.dp))
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ButtonPreview() {
+    MainButton(modifier = Modifier, icon = null, text = "Lorem Ipsum", onClick = {})
 }

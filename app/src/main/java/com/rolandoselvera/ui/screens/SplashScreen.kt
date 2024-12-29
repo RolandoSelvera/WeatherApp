@@ -41,8 +41,8 @@ fun SplashScreen(
     ) {
         Image(
             modifier = Modifier
-                .width(200.dp)
-                .height(200.dp),
+                .width(250.dp)
+                .height(250.dp),
             painter = painterResource(id = R.drawable.ic_launcher_foreground),
             contentDescription = "Logo"
         )
