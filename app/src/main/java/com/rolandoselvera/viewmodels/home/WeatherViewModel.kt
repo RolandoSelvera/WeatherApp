@@ -12,16 +12,18 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class WeatherViewModel @Inject constructor(private val repository: WeatherRepository) : ViewModel() {
+class WeatherViewModel @Inject constructor(private val repository: WeatherRepository) :
+    ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState<WeatherResponse>>(UiState.Loading)
     val uiState: StateFlow<UiState<WeatherResponse>> = _uiState
 
     fun getWeather(location: String) {
         viewModelScope.launch {
+            _uiState.value = UiState.Loading
             try {
-                val response = repository.fetchWeather(location)
-                _uiState.value = UiState.Success(response)
+                val weather = repository.fetchWeather(location)
+                _uiState.value = UiState.Success(weather)
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e)
             }
