@@ -61,6 +61,15 @@ Para compilar y ejecutar este proyecto, sigue estos pasos:
 * Conecta un dispositivo Android físico o inicia un emulador.
 * Haz clic en el botón **Run** o usa el atajo **Shift + F10** para compilar y ejecutar la aplicación.
 
+### Tests
+
+El proyecto incluye algunas pruebas unitarias e instrumentadas para probar su funcionalidad. Se utilizan las siguientes librerías:
+
+* [JUnit](https://junit.org/junit4/): Para las pruebas unitarias, verificando la lógica de negocio en los ViewModels y repositorios.
+* [Mockito](https://site.mockito.org/): Para crear objetos simulados (mocks) de las dependencias como los repositorios, lo que permite aislar las pruebas.
+* [Kotlin Coroutines Test](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-test/): Para probar la lógica asincrónica en los ViewModels, utilizando un dispatcher de prueba para controlar el comportamiento de las corrutinas.
+* [Jetpack Compose Test](https://developer.android.com/develop/ui/compose/testing?hl=es-419): Para realizar pruebas de la interfaz de usuario (UI), asegurando que los componentes de la pantalla, se muestren correctamente.
+
 ### Otros recursos
 
 Puedes descargar e importar la colección de POSTMAN para probar la API de WeatherAPI [desde este enlace](docs/postman).
