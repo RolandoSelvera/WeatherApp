@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -45,6 +46,7 @@ import com.rolandoselvera.viewmodels.home.WeatherViewModel
 
 @Composable
 fun HomeScreen(
+    navigateToDetail: (WeatherResponse) -> Unit,
     viewModel: WeatherViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -62,36 +64,27 @@ fun HomeScreen(
     val resultsToDisplay = if (searchTerm.isEmpty()) {
         weatherResults
     } else {
-        filteredResults.clear()
-        filteredResults.addAll(
-            weatherResults.filter {
-                it.location.name.contains(searchTerm.trim(), ignoreCase = true) ||
-                        it.location.region.contains(searchTerm.trim(), ignoreCase = true)
-            }
-        )
+        setupFilters(filteredResults, weatherResults, searchTerm)
         filteredResults
     }
 
+    // Init screen:
     LayoutHomeScreen(
         viewModel = viewModel,
         searchTerm = searchTerm,
         onNameChange = { searchTerm = it },
         weatherResults = resultsToDisplay,
+        navigateToDetail = navigateToDetail,
         onDeleteClick = { weather ->
             weatherToDelete.value = weather
             deleteDialog.value = true
         },
         onClickSearchIcon = {
-            filteredResults.clear()
-            filteredResults.addAll(
-                weatherResults.filter {
-                    it.location.name.contains(searchTerm.trim(), ignoreCase = true) ||
-                            it.location.region.contains(searchTerm.trim(), ignoreCase = true)
-                }
-            )
+            setupFilters(filteredResults, weatherResults, searchTerm)
         }
     )
 
+    // UI states:
     when (uiState) {
         UiState.Loading -> {
             isShowDialog.value = true
@@ -121,6 +114,7 @@ fun HomeScreen(
         }
     }
 
+    // Delete dialog:
     weatherToDelete.value?.let { weatherResponse ->
         ConfirmationDialog(
             isVisible = deleteDialog.value,
@@ -142,6 +136,7 @@ fun HomeScreen(
         )
     }
 
+    // Progress dialog state:
     if (uiState is UiState.Loading) {
         ProgressDialog(isVisible = true)
     } else {
@@ -156,10 +151,12 @@ fun LayoutHomeScreen(
     searchTerm: String,
     onNameChange: (String) -> Unit,
     weatherResults: List<WeatherResponse>,
+    navigateToDetail: (WeatherResponse) -> Unit,
     onDeleteClick: (WeatherResponse) -> Unit,
     onClickSearchIcon: () -> Unit
 ) {
     Scaffold(
+        // Header:
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -178,12 +175,14 @@ fun LayoutHomeScreen(
             )
         }
     ) { paddingValues ->
+        // Body:
         ContentHomeScreen(
             viewModel = viewModel,
             searchTerm = searchTerm,
             onNameChange = onNameChange,
             weatherResults = weatherResults,
             modifier = Modifier.padding(paddingValues),
+            navigateToDetail = navigateToDetail,
             onDeleteClick = onDeleteClick,
             onClickSearchIcon = onClickSearchIcon
         )
@@ -197,6 +196,7 @@ fun ContentHomeScreen(
     onNameChange: (String) -> Unit,
     weatherResults: List<WeatherResponse>,
     modifier: Modifier = Modifier,
+    navigateToDetail: (WeatherResponse) -> Unit,
     onDeleteClick: (WeatherResponse) -> Unit,
     onClickSearchIcon: () -> Unit
 ) {
@@ -208,6 +208,7 @@ fun ContentHomeScreen(
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
+            // Search/filter field:
             SearchTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = searchTerm,
@@ -220,6 +221,7 @@ fun ContentHomeScreen(
 
             SpaceView(padding = 8.dp)
 
+            // Search & save button:
             MainButton(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -234,6 +236,7 @@ fun ContentHomeScreen(
 
             SpaceView(padding = 8.dp)
 
+            // Show no results message:
             if (weatherResults.isEmpty()) {
                 MainTitle(
                     modifier = Modifier
@@ -246,12 +249,14 @@ fun ContentHomeScreen(
                 )
             }
 
+            // Show weather results list:
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(weatherResults) { weather ->
                     WeatherItem(
                         weather = weather,
+                        navigateToDetail = { navigateToDetail(weather) },
                         onDeleteClick = { weatherToDelete -> onDeleteClick(weatherToDelete) }
                     )
                     HorizontalDivider(thickness = 2.dp)
@@ -271,6 +276,20 @@ fun ContentHomeScreen(
 private fun DefaultPreview() {
     val viewModel: WeatherViewModel = hiltViewModel()
     MyApplicationTheme {
-        LayoutHomeScreen(viewModel, "", {}, arrayListOf(), {}, {})
+        LayoutHomeScreen(viewModel, "", {}, arrayListOf(), {}, {}, {})
     }
+}
+
+private fun setupFilters(
+    filteredResults: SnapshotStateList<WeatherResponse>,
+    weatherResults: SnapshotStateList<WeatherResponse>,
+    searchTerm: String
+) {
+    filteredResults.clear()
+    filteredResults.addAll(
+        weatherResults.filter {
+            it.location.name.contains(searchTerm.trim(), ignoreCase = true) ||
+                    it.location.region.contains(searchTerm.trim(), ignoreCase = true)
+        }
+    )
 }

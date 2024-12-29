@@ -29,7 +29,11 @@ import com.rolandoselvera.R
 import com.rolandoselvera.data.remote.models.responses.WeatherResponse
 
 @Composable
-fun WeatherItem(weather: WeatherResponse?, onDeleteClick: (WeatherResponse) -> Unit) {
+fun WeatherItem(
+    weather: WeatherResponse?,
+    navigateToDetail: () -> Unit,
+    onDeleteClick: (WeatherResponse) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -45,7 +49,11 @@ fun WeatherItem(weather: WeatherResponse?, onDeleteClick: (WeatherResponse) -> U
             .build()
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    navigateToDetail()
+                },
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -63,7 +71,7 @@ fun WeatherItem(weather: WeatherResponse?, onDeleteClick: (WeatherResponse) -> U
             Column(
                 modifier = Modifier
                     .padding(start = 16.dp)
-                    .weight(1f) // Deja que este espacio use el máximo disponible
+                    .weight(1f)
             ) {
                 Text(
                     text = stringResource(
@@ -104,5 +112,5 @@ fun WeatherItem(weather: WeatherResponse?, onDeleteClick: (WeatherResponse) -> U
 @Preview(showBackground = true)
 @Composable
 fun WeatherItemPreview() {
-    WeatherItem(null, {})
+    WeatherItem(null, {}, {})
 }
