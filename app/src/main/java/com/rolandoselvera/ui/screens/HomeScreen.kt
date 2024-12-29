@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -210,7 +211,9 @@ fun ContentHomeScreen(
         ) {
             // Search/filter field:
             SearchTextField(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .testTag("searchField")
+                    .fillMaxWidth(),
                 value = searchTerm,
                 onValueChange = onNameChange,
                 label = stringResource(R.string.search_location),
@@ -224,6 +227,7 @@ fun ContentHomeScreen(
             // Search & save button:
             MainButton(
                 modifier = Modifier
+                    .testTag("saveButton")
                     .fillMaxWidth(),
                 icon = null,
                 backgroundColor = Secondary,
@@ -251,7 +255,9 @@ fun ContentHomeScreen(
 
             // Show weather results list:
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .testTag("weatherList")
+                    .fillMaxSize()
             ) {
                 items(weatherResults) { weather ->
                     WeatherItem(
