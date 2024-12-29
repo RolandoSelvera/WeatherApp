@@ -36,29 +36,26 @@ N/A
 
 En el diseño de la app se siguieron los lineamientos de [Material Design](https://material.io/).
 
-### Descarga del proyecto y otros recursos
-
-El proyecto puedes clonarlo o descargarlo si lo deseas.
-
 ### Compilación y ejecución
 
 Para compilar y ejecutar este proyecto, sigue estos pasos:
 
-1.  **Clona el repositorio:**  
-    git clone https://github.com/rolandoselvera/WeatherApp.git
-    cd WeatherApp
+1.  **Clona el repositorio:**
+``git clone https://github.com/rolandoselvera/WeatherApp.git``
 
-2. **Abre el proyecto en Android Studio:**
+4. **Abre el proyecto en Android Studio:**
 * Asegúrate de tener instalado Android Studio con una versión compatible con el proyecto ([Android Studio Koala](https://developer.android.com/studio/releases/past-releases/as-koala-release-notes) o superior).
-* Abre el proyecto y sincroniza Gradle si es necesario. **IMPORTANTE:**
-    * La versión de Java utilizada para compilar el proyecto es la 17.
-    * La versión de JDK Gradle que se utilizó en el proyecto es la 21.0.3. Puedes configurar esta opción en  `File > Settings > Build, Execution, Deployment > Build Tools > Gradle > Gradle JDK` y seleccionar esa versión o descargarla en ese menú.
+* Abre el proyecto y sincroniza Gradle si es necesario.
+
+**IMPORTANTE:**
+* La versión de **Java** utilizada para compilar el proyecto es la 17.
+* La versión de **JDK Gradle** que se utilizó en el proyecto es la 21.0.3. Puedes configurar esta opción en  `File > Settings > Build, Execution, Deployment > Build Tools > Gradle > Gradle JDK` y seleccionar esa versión o descargarla en ese menú.
 
 3. **Configura la clave API:**
 * Obtén tu clave de API gratuita en [WeatherAPI](https://www.weatherapi.com/docs/).
 * Abre el archivo `local.properties` que se encuentra en el directorio raíz del proyecto. Si no existe, puedes crearlo con ese mismo nombre.
 * Añade la siguiente línea, reemplazando `YOUR_API_KEY` con tu clave de API:
-    * API_KEY=YOUR_API_KEY
+    * ``API_KEY=YOUR_API_KEY``
 
 4. **Ejecutar la aplicación:**
 * Conecta un dispositivo Android físico o inicia un emulador.
